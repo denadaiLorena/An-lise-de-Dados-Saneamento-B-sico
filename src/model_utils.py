@@ -234,14 +234,23 @@ def rotular_clusters(
 	Rotula clusters ordenados por risco social.
 	"""
 	if labels is None:
-		if k_final != 4:
-			raise ValueError('labels deve ser informado quando k_final != 4')
-		labels = [
-			'Zona Verde - Baixo Risco',
-			'Zona Amarela - Risco Moderado',
-			'Zona Laranja - Risco Elevado',
-			'Zona Vermelha - Risco Critico'
+		niveis = [
+			'Baixo Risco',
+			'Risco Moderado',
+			'Risco Elevado',
+			'Risco Critico',
+			'Risco Muito Critico'
 		]
+		prefixos = [
+			'Zona Verde',
+			'Zona Amarela',
+			'Zona Laranja',
+			'Zona Vermelha',
+			'Zona Preta'
+		]
+		if k_final > len(niveis):
+			raise ValueError('labels deve ser informado quando k_final > 5')
+		labels = [f"{prefixos[i]} - {niveis[i]}" for i in range(k_final)]
 
 	ordem_risco = perfil['RISCO_SOCIAL_FINAL'].sort_values().index.tolist()
 	rotulos = {ordem_risco[i]: labels[i] for i in range(len(ordem_risco))}
