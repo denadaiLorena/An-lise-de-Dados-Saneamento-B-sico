@@ -104,16 +104,29 @@ def teste_kruskal_wallis_por_tercis(
 		labels = ['Baixo', 'Medio', 'Alto']
 
 	df_hip = df[[coluna_saneamento, coluna_saude]].dropna().copy()
-	df_hip['grupo_saneamento'] = pd.qcut(
-		df_hip[coluna_saneamento],
-		q=q,
-		labels=labels
-	)
+	if df_hip.empty:
+		df_hip['grupo_saneamento'] = pd.Series(dtype='category')
+		return np.nan, np.nan, df_hip
 
+	try:
+		df_hip['grupo_saneamento'] = pd.qcut(
+			df_hip[coluna_saneamento],
+			q=q,
+			labels=labels,
+			duplicates='drop'
+		)
+	except ValueError:
+		df_hip['grupo_saneamento'] = pd.Series(dtype='category')
+		return np.nan, np.nan, df_hip
+
+	labels_validos = list(df_hip['grupo_saneamento'].cat.categories)
 	grupos = [
 		df_hip[df_hip['grupo_saneamento'] == label][coluna_saude]
-		for label in labels
+		for label in labels_validos
 	]
+	grupos = [grupo for grupo in grupos if len(grupo) > 0]
+	if len(grupos) < 2:
+		return np.nan, np.nan, df_hip
 
 	stat, p_valor = stats.kruskal(*grupos)
 	return stat, p_valor, df_hip
