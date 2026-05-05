@@ -1,7 +1,9 @@
 basedosdados
 folium
 geopandas
+ipykernel
 matplotlib
+nbconvert
 numpy
 pandas
 pandas-gbq
