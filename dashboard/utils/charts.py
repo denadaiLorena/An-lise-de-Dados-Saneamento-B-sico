@@ -1,7 +1,7 @@
 """
 utils/charts.py
 Funções de criação de gráficos Plotly reutilizáveis.
-Todos os gráficos seguem o design system do dashboard.
+Todos os gráficos seguem o design system do dashboard com suporte a modo claro/escuro.
 """
 
 from __future__ import annotations
@@ -11,37 +11,76 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import streamlit as st
 
 from utils.data_loader import ZONA_CORES, nome_amigavel
+from utils.theme import get_theme_mode, THEME_LIGHT, THEME_DARK
 
 # ─── Design System ────────────────────────────────────────────────────────────
 
-LAYOUT_BASE = dict(
-    paper_bgcolor="rgba(0,0,0,0)",
-    plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(family="Inter, sans-serif", color="#0f172a", size=13),
-    margin=dict(t=60, b=40, l=50, r=30),
-    legend=dict(
-        bgcolor="rgba(255,255,255,0.9)",
-        bordercolor="rgba(148,163,184,0.28)",
-        borderwidth=1,
-        font=dict(size=12),
-    ),
-    coloraxis_colorbar=dict(
-        tickfont=dict(color="#334155"),
-    ),
-)
+def _get_tokens():
+    """Retorna os tokens do tema ativo."""
+    mode = get_theme_mode()
+    return THEME_LIGHT if mode == "Claro" else THEME_DARK
 
-GRID_STYLE = dict(
-    xaxis=dict(gridcolor="rgba(148,163,184,0.1)", zerolinecolor="rgba(148,163,184,0.2)"),
-    yaxis=dict(gridcolor="rgba(148,163,184,0.1)", zerolinecolor="rgba(148,163,184,0.2)"),
-)
 
+def _get_layout_base():
+    """Retorna o layout base adaptado ao tema ativo."""
+    tokens = _get_tokens()
+    is_dark = get_theme_mode() == "Escuro"
+
+    return dict(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(family="Inter, sans-serif", color=tokens['title'], size=13),
+        margin=dict(t=60, b=50, l=60, r=40),
+        legend=dict(
+            bgcolor=tokens['surface'],
+            bordercolor=tokens['surface_border'],
+            borderwidth=1,
+            font=dict(size=12, color=tokens['text']),
+        ),
+        coloraxis_colorbar=dict(
+            tickfont=dict(color=tokens['text']),
+            outlinecolor=tokens['surface_border'],
+            outlinewidth=1,
+        ),
+        hoverlabel=dict(
+            bgcolor=tokens['surface'],
+            font=dict(family="Inter, sans-serif", color=tokens['title'], size=12),
+            bordercolor=tokens['surface_border'],
+        ),
+    )
+
+
+def _get_grid_style():
+    """Retorna o estilo de grid adaptado ao tema."""
+    tokens = _get_tokens()
+    is_dark = get_theme_mode() == "Escuro"
+
+    grid_color = "rgba(148,163,184,0.08)" if is_dark else "rgba(148,163,184,0.15)"
+    zeroline_color = "rgba(148,163,184,0.15)" if is_dark else "rgba(148,163,184,0.25)"
+
+    return dict(
+        xaxis=dict(
+            gridcolor=grid_color,
+            zerolinecolor=zeroline_color,
+            color=tokens['text'],
+        ),
+        yaxis=dict(
+            gridcolor=grid_color,
+            zerolinecolor=zeroline_color,
+            color=tokens['text'],
+        ),
+    )
+
+
+# Paleta de cores para risco (funciona em ambos os modos)
 SEQUENCIAL_RISK = [
-    [0.0, "#22c55e"],
-    [0.33, "#eab308"],
-    [0.66, "#f97316"],
-    [1.0, "#ef4444"],
+    [0.0, "#22C55E"],   # Verde
+    [0.33, "#EAB308"],  # Amarelo
+    [0.66, "#F97316"],  # Laranja
+    [1.0, "#EF4444"],   # Vermelho
 ]
 
 
@@ -57,14 +96,18 @@ def _hex_to_rgba(hex_color: str, alpha: float = 0.15) -> str:
 
 
 def _aplicar_layout(fig: go.Figure, titulo: str = "", **kwargs) -> go.Figure:
-    """Aplica layout padrão ao figure."""
-    layout = {**LAYOUT_BASE, **GRID_STYLE}
+    """Aplica layout padrão ao figure com suporte ao tema ativo."""
+    tokens = _get_tokens()
+    layout = {**_get_layout_base(), **_get_grid_style()}
+
     if titulo:
         layout["title"] = dict(
             text=titulo,
-            font=dict(size=16, color="#0f172a"),
+            font=dict(size=17, color=tokens['title'], family="Inter, sans-serif"),
             x=0.02,
+            xanchor="left",
         )
+
     layout.update(kwargs)
     fig.update_layout(**layout)
     return fig
@@ -77,6 +120,9 @@ def grafico_distribuicao_risco(df: pd.DataFrame, ano: int | None = None) -> go.F
     Histograma + KDE da distribuição do Índice de Risco Social.
     Mostra quão concentrados estão os municípios em cada faixa de risco.
     """
+    tokens = _get_tokens()
+    is_dark = get_theme_mode() == "Escuro"
+
     dados = df.copy()
     if ano:
         dados = dados[dados["ano"] == ano]
@@ -92,26 +138,35 @@ def grafico_distribuicao_risco(df: pd.DataFrame, ano: int | None = None) -> go.F
         marker=dict(
             color=dados["RISCO_SOCIAL_FINAL"],
             colorscale=SEQUENCIAL_RISK,
-            line=dict(color="rgba(255,255,255,0.1)", width=0.5),
+            line=dict(
+                color="rgba(255,255,255,0.2)" if is_dark else "rgba(15,23,42,0.1)",
+                width=0.8
+            ),
         ),
-        opacity=0.85,
+        opacity=0.9,
         hovertemplate="<b>Risco:</b> %{x:.1f}<br><b>Municípios:</b> %{y}<extra></extra>",
     ))
 
     # Linhas de quartis
     q25, q50, q75 = dados["RISCO_SOCIAL_FINAL"].quantile([0.25, 0.50, 0.75]).values
     for val, label, color in [
-        (q25, "25%", "#22c55e"),
-        (q50, "Mediana", "#eab308"),
-        (q75, "75%", "#ef4444"),
+        (q25, "Q1 (25%)", "#22C55E"),
+        (q50, "Mediana", "#EAB308"),
+        (q75, "Q3 (75%)", "#EF4444"),
     ]:
         fig.add_vline(
             x=val,
             line_dash="dash",
             line_color=color,
-            line_width=1.5,
-            annotation_text=f"{label}: {val:.1f}",
-            annotation_font_color=color,
+            line_width=2,
+            annotation=dict(
+                text=f"{label}: {val:.1f}",
+                font=dict(color=color, size=11, family="Inter, sans-serif"),
+                bgcolor="rgba(0,0,0,0.05)" if not is_dark else "rgba(255,255,255,0.05)",
+                bordercolor=color,
+                borderwidth=1,
+                borderpad=4,
+            ),
             annotation_position="top right",
         )
 
@@ -121,6 +176,7 @@ def grafico_distribuicao_risco(df: pd.DataFrame, ano: int | None = None) -> go.F
         xaxis_title="Índice de Risco Social (0–100)",
         yaxis_title="Número de Municípios",
         showlegend=False,
+        xaxis=dict(range=[0, 100]),
     )
     return fig
 
@@ -477,15 +533,30 @@ def grafico_comparacao_municipios(df: pd.DataFrame, municipios: list[str]) -> go
             hovertemplate="<b>%{theta}</b><br>Valor: %{r:.1f}<extra></extra>",
         ))
 
+    tokens = _get_tokens()
+    is_dark = get_theme_mode() == "Escuro"
+
     fig.update_layout(
-        **LAYOUT_BASE,
+        **_get_layout_base(),
+        **_get_grid_style(),
         polar=dict(
-            bgcolor="rgba(255,255,255,0.7)",
-            radialaxis=dict(visible=True, range=[0, 100], gridcolor="rgba(148,163,184,0.15)",
-                           tickfont=dict(color="#334155", size=10)),
-            angularaxis=dict(gridcolor="rgba(148,163,184,0.15)", linecolor="rgba(148,163,184,0.3)"),
+            bgcolor=tokens['surface'],
+            radialaxis=dict(
+                visible=True,
+                range=[0, 100],
+                gridcolor="rgba(148,163,184,0.08)" if is_dark else "rgba(148,163,184,0.15)",
+                tickfont=dict(color=tokens['text'], size=10),
+            ),
+            angularaxis=dict(
+                gridcolor="rgba(148,163,184,0.08)" if is_dark else "rgba(148,163,184,0.15)",
+                linecolor=tokens['surface_border'],
+            ),
         ),
-        title=dict(text="Perfil Comparativo de Saneamento", font=dict(size=16, color="#0f172a"), x=0.02),
+        title=dict(
+            text="Perfil Comparativo de Saneamento",
+            font=dict(size=17, color=tokens['title'], family="Inter, sans-serif"),
+            x=0.02,
+        ),
     )
     return fig
 
@@ -597,46 +668,69 @@ def grafico_perfil_municipio(df: pd.DataFrame, municipio: str) -> go.Figure:
     if "ano" in dados.columns and not dados.empty:
         dados = dados.sort_values("ano").tail(1)
 
+    tokens = _get_tokens()
+    is_dark = get_theme_mode() == "Escuro"
+
     if dados.empty:
         fig = go.Figure()
-        fig.add_annotation(text="Município não encontrado.", showarrow=False, font_color="#334155")
+        fig.add_annotation(
+            text="Município não encontrado.",
+            showarrow=False,
+            font=dict(color=tokens['text'], size=14)
+        )
         return _aplicar_layout(fig)
 
     row = dados.iloc[0]
     risco = float(row.get("RISCO_SOCIAL_FINAL", 50) or 50)
 
-    # Determinar cor do gauge
+    # Determinar cor do gauge (consistente com SEQUENCIAL_RISK)
     if risco < 25:
-        gauge_color = "#22c55e"
+        gauge_color = "#22C55E"  # Verde
     elif risco < 50:
-        gauge_color = "#eab308"
+        gauge_color = "#EAB308"  # Amarelo
     elif risco < 75:
-        gauge_color = "#f97316"
+        gauge_color = "#F97316"  # Laranja
     else:
-        gauge_color = "#ef4444"
+        gauge_color = "#EF4444"  # Vermelho
+
+    # Steps com opacidade ajustada ao tema
+    step_opacity = 0.12 if is_dark else 0.15
 
     fig = go.Figure(go.Indicator(
         mode="gauge+number+delta",
         value=risco,
-        title={"text": f"Risco Social — {municipio}", "font": {"color": "#0f172a", "size": 16}},
-        number={"font": {"color": "#0f172a", "size": 40}},
+        title={
+            "text": f"Risco Social — {municipio}",
+            "font": {"color": tokens['title'], "size": 17, "family": "Inter, sans-serif"}
+        },
+        number={"font": {"color": tokens['title'], "size": 40, "family": "Inter, sans-serif"}},
         gauge={
-            "axis": {"range": [0, 100], "tickcolor": "#64748b"},
+            "axis": {
+                "range": [0, 100],
+                "tickcolor": tokens['text'],
+                "tickfont": {"color": tokens['text'], "size": 11}
+            },
             "bar": {"color": gauge_color, "thickness": 0.25},
-            "bgcolor": "rgba(255,255,255,0.9)",
-            "bordercolor": "rgba(148,163,184,0.3)",
+            "bgcolor": tokens['surface'],
+            "bordercolor": tokens['surface_border'],
+            "borderwidth": 2,
             "steps": [
-                {"range": [0, 25], "color": "rgba(34,197,94,0.15)"},
-                {"range": [25, 50], "color": "rgba(234,179,8,0.15)"},
-                {"range": [50, 75], "color": "rgba(249,115,22,0.15)"},
-                {"range": [75, 100], "color": "rgba(239,68,68,0.15)"},
+                {"range": [0, 25], "color": f"rgba(34,197,94,{step_opacity})"},
+                {"range": [25, 50], "color": f"rgba(234,179,8,{step_opacity})"},
+                {"range": [50, 75], "color": f"rgba(249,115,22,{step_opacity})"},
+                {"range": [75, 100], "color": f"rgba(239,68,68,{step_opacity})"},
             ],
-            "threshold": {"line": {"color": "#334155", "width": 3}, "value": risco},
+            "threshold": {
+                "line": {"color": tokens['text'], "width": 3},
+                "value": risco,
+                "thickness": 0.8
+            },
         },
     ))
 
     fig.update_layout(
-        **LAYOUT_BASE,
+        **_get_layout_base(),
+        **_get_grid_style(),
         height=280,
     )
     return fig
