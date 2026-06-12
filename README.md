@@ -618,78 +618,11 @@ def grafico_novo(df: pd.DataFrame, coluna: str) -> go.Figure:
     
     return fig
 ```
-
-### Boas Práticas
-
-✅ **Sempre** chame `apply_theme()` no início de cada página  
-✅ Use componentes de `utils/components.py` em vez de HTML direto  
-✅ Use `_aplicar_layout()` para todos os gráficos Plotly  
-✅ Adicione docstrings em todas as funções  
-✅ Use type hints (`str`, `int`, `pd.DataFrame`, etc.)  
-✅ Mantenha funções pequenas e focadas (< 50 linhas)  
-✅ Cache dados com `@st.cache_data`  
-✅ Teste em ambos os modos (claro e escuro)  
-
----
-
-## 🤝 Contribuindo
-
-Contribuições são **muito bem-vindas**! Este projeto é open-source e qualquer ajuda é apreciada.
-
-### Como Contribuir
-
-1. **Fork** o repositório
-2. **Clone** seu fork: `git clone https://github.com/seu-usuario/analise-saneamento-es.git`
-3. Crie uma **branch** para sua feature: `git checkout -b feature/minha-feature`
-4. **Commit** suas mudanças: `git commit -m 'feat: adiciona nova análise'`
-5. **Push** para a branch: `git push origin feature/minha-feature`
-6. Abra um **Pull Request**
-
-### Tipos de Contribuição
-
-- 🐛 **Reportar bugs**: Abra uma issue descrevendo o problema
-- 💡 **Sugerir features**: Compartilhe ideias de melhorias
-- 📝 **Melhorar documentação**: Corrija erros ou adicione exemplos
-- 🎨 **Design**: Melhore UI/UX ou componentes visuais
-- 🔬 **Análises**: Adicione novos gráficos ou análises estatísticas
-- 🧪 **Testes**: Adicione testes unitários ou de integração
-
-### Padrões de Commit
-
-Usamos [Conventional Commits](https://www.conventionalcommits.org/):
-
-```
-feat: adiciona nova página de análise temporal
-fix: corrige contraste no modo escuro
-docs: atualiza README com instruções de instalação
-style: formata código com black
-refactor: reorganiza estrutura de componentes
-test: adiciona testes para data_loader
-chore: atualiza dependências
-```
-
-### Reportar Problemas
-
-Ao abrir uma **issue**, inclua:
-- ✅ Descrição clara do problema
-- ✅ Passos para reproduzir
-- ✅ Comportamento esperado vs. atual
-- ✅ Screenshots (se aplicável)
-- ✅ Versão Python, SO, navegador
-- ✅ Mensagens de erro completas
-
 ---
 
 ## 👥 Autores
-
-### Desenvolvimento Principal
-- **[Seu Nome]** - Desenvolvimento full-stack, análise de dados, ML
-
-### Design System & UI/UX
-- **[Nome do Designer]** - Design system, acessibilidade, componentes
-
-### Análise de Dados
-- **[Nome do Analista]** - ETL, análise estatística, modelagem
+LORENA MOREIRA DE NADAI
+WANESSA SILVA GUISSO
 
 ### Contribuidores
 Veja a lista completa de [contribuidores](https://github.com/seu-usuario/analise-saneamento-es/contributors) que participaram deste projeto.
@@ -717,7 +650,7 @@ furnished to do so, subject to the following conditions:
 
 ---
 
-## 🙏 Agradecimentos
+## Agradecimentos
 
 - **[SNIS](http://www.snis.gov.br/)** pelos dados de saneamento
 - **[DATASUS](https://datasus.saude.gov.br/)** pelos dados de saúde pública
@@ -728,19 +661,6 @@ furnished to do so, subject to the following conditions:
 
 ---
 
-## 📞 Contato
-
-### Issues e Suporte
-- 🐛 Bugs: [GitHub Issues](https://github.com/seu-usuario/analise-saneamento-es/issues)
-- 💡 Features: [GitHub Discussions](https://github.com/seu-usuario/analise-saneamento-es/discussions)
-
-### Redes Sociais
-- 📧 Email: seu.email@exemplo.com
-- 💼 LinkedIn: [seu-perfil](https://linkedin.com/in/seu-perfil)
-- 🐙 GitHub: [@seu-usuario](https://github.com/seu-usuario)
-
----
-
 ## 📊 Status do Projeto
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/seu-usuario/analise-saneamento-es?style=flat-square)
@@ -748,32 +668,6 @@ furnished to do so, subject to the following conditions:
 ![GitHub pull requests](https://img.shields.io/github/issues-pr/seu-usuario/analise-saneamento-es?style=flat-square)
 ![GitHub stars](https://img.shields.io/github/stars/seu-usuario/analise-saneamento-es?style=flat-square)
 ![GitHub forks](https://img.shields.io/github/forks/seu-usuario/analise-saneamento-es?style=flat-square)
-
----
-
-## 🗺️ Roadmap
-
-### v1.0 (Atual) ✅
-- [x] Dashboard básico com 7 páginas
-- [x] Design system completo
-- [x] Modo claro/escuro
-- [x] Análises estatísticas
-- [x] Machine Learning (K-Means)
-- [x] Documentação completa
-
-### v1.1 (Planejado) 🔄
-- [ ] Testes unitários (pytest)
-- [ ] CI/CD (GitHub Actions)
-- [ ] Docker containerization
-- [ ] Deploy em cloud (Streamlit Cloud / Heroku)
-
-### v2.0 (Futuro) 🚀
-- [ ] API REST para dados
-- [ ] Exportar relatórios PDF
-- [ ] Comparação entre estados
-- [ ] Predição de tendências (Time Series)
-- [ ] Mobile-first responsive design
-- [ ] Multi-idioma (PT/EN/ES)
 
 ---
 
