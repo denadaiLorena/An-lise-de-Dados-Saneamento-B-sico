@@ -30,24 +30,24 @@ st.set_page_config(
 )
 
 # ─── Tema Global ─────────────────────────────────────────────────────────────
+from utils.theme import THEME_LIGHT, THEME_DARK
+
 apply_theme(show_toggle=True)
 is_dark = get_theme_mode() == "Escuro"
+tokens = THEME_DARK if is_dark else THEME_LIGHT
 
 home_panel_bg = (
-    "linear-gradient(135deg, rgba(30,41,59,0.9) 0%, rgba(15,23,42,0.88) 55%, rgba(30,41,59,0.9) 100%)"
+    "linear-gradient(135deg, rgba(30,41,59,0.85) 0%, rgba(15,23,42,0.8) 50%, rgba(30,41,59,0.85) 100%)"
     if is_dark
-    else "linear-gradient(135deg, rgba(219,234,254,0.9) 0%, rgba(255,255,255,0.95) 55%, rgba(224,242,254,0.9) 100%)"
+    else "linear-gradient(135deg, rgba(219,234,254,0.7) 0%, rgba(255,255,255,0.95) 50%, rgba(219,234,254,0.7) 100%)"
 )
-home_panel_border = "rgba(96,165,250,0.32)" if is_dark else "rgba(59,130,246,0.24)"
-title_color = "#f1f5f9" if is_dark else "#0f172a"
-subtitle_color = "#94a3b8" if is_dark else "#334155"
-body_color = "#cbd5e1" if is_dark else "#475569"
-card_bg = (
-    "linear-gradient(135deg, rgba(30,41,59,0.9), rgba(15,23,42,0.86))"
-    if is_dark
-    else "linear-gradient(135deg, rgba(255,255,255,0.95), rgba(248,250,252,0.92))"
-)
-card_border = "rgba(148,163,184,0.16)" if is_dark else "rgba(148,163,184,0.24)"
+home_panel_border = tokens['surface_border']
+title_color = tokens['title']
+subtitle_color = tokens['text']
+body_color = tokens['muted']
+card_bg = tokens['surface']
+card_border = tokens['surface_border']
+card_shadow = tokens['surface_shadow']
 
 # ─── Sidebar ──────────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -125,16 +125,16 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ─── Cards de Seções ──────────────────────────────────────────────────────────
-st.markdown("### 🗺️ O que você encontra aqui")
+st.markdown(f"<h3 style='color:{title_color}; margin-top:2rem; margin-bottom:1rem;'>🗺️ O que você encontra aqui</h3>", unsafe_allow_html=True)
 
 secoes = [
-    ("🏠", "Visão Geral", "KPIs principais, distribuição do risco social e ranking de municípios.", "#3b82f6"),
-    ("🗺️", "Mapa Interativo", "Mapa geográfico do ES com municípios coloridos por zona de vulnerabilidade.", "#10b981"),
-    ("📈", "Correlação", "Heatmap de Spearman e análise da relação entre saneamento e internações.", "#8b5cf6"),
-    ("🔬", "Análise Estatística", "Testes de normalidade (Shapiro-Wilk) e hipótese (Kruskal-Wallis) com boxplots.", "#f59e0b"),
-    ("🤖", "Clusterização", "Visualização dos clusters K-Means e perfil de cada zona de vulnerabilidade.", "#ef4444"),
-    ("🔍", "Perfil do Município", "Ficha completa de qualquer município: histórico, gauge de risco e comparações.", "#06b6d4"),
-    ("📊", "Análises Avançadas", "Ranking, linha do tempo, investimento × risco e tendências estaduais.", "#f97316"),
+    ("🏠", "Visão Geral", "KPIs principais, distribuição do risco social e ranking de municípios.", tokens['primary']),
+    ("🗺️", "Mapa Interativo", "Mapa geográfico do ES com municípios coloridos por zona de vulnerabilidade.", tokens['success']),
+    ("📈", "Correlação", "Heatmap de Spearman e análise da relação entre saneamento e internações.", "#8B5CF6"),
+    ("🔬", "Análise Estatística", "Testes de normalidade (Shapiro-Wilk) e hipótese (Kruskal-Wallis) com boxplots.", tokens['warning']),
+    ("🤖", "Clusterização", "Visualização dos clusters K-Means e perfil de cada zona de vulnerabilidade.", tokens['danger']),
+    ("🔍", "Perfil do Município", "Ficha completa de qualquer município: histórico, gauge de risco e comparações.", tokens['info']),
+    ("📊", "Análises Avançadas", "Ranking, linha do tempo, investimento × risco e tendências estaduais.", "#F97316"),
 ]
 
 cols_row1 = st.columns(4)
@@ -148,75 +148,98 @@ for (icone, titulo, descricao, cor), col in zip(secoes, cols):
             background: {card_bg};
             border: 1px solid {card_border};
             border-top: 3px solid {cor};
-            border-radius: 14px;
-            padding: 1.3rem;
+            border-radius: 12px;
+            padding: 1.4rem;
             margin-bottom: 1rem;
-            transition: transform 0.2s ease;
+            box-shadow: {card_shadow};
+            transition: all 0.2s ease;
             cursor: default;
-        ">
-            <div style="font-size:2rem; margin-bottom:0.5rem;">{icone}</div>
+        " onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 18px rgba(0,0,0,0.15)'"
+           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='{card_shadow}'">
+            <div style="font-size:2.2rem; margin-bottom:0.6rem;">{icone}</div>
             <div style="
                 font-family:'Inter',sans-serif;
-                font-size:0.95rem;
+                font-size:1rem;
                 font-weight:700;
                 color:{title_color};
-                margin-bottom:0.4rem;
+                margin-bottom:0.5rem;
             ">{titulo}</div>
             <div style="
                 color:{body_color};
-                font-size:0.78rem;
-                line-height:1.5;
+                font-size:0.82rem;
+                line-height:1.6;
             ">{descricao}</div>
         </div>
         """, unsafe_allow_html=True)
 
 # ─── Problema Social ──────────────────────────────────────────────────────────
-st.markdown("---")
-social_impact_html = """
-<div style="max-width:900px; margin:0 auto;">
+st.markdown(f"<hr style='border:none; border-top:1px solid {card_border}; margin:2.5rem 0;'>", unsafe_allow_html=True)
+
+danger_bg = "rgba(239,68,68,0.12)" if is_dark else "rgba(239,68,68,0.08)"
+danger_border = tokens['danger']
+danger_text = "#FCA5A5" if is_dark else "#991B1B"
+
+warning_bg = "rgba(234,179,8,0.12)" if is_dark else "rgba(234,179,8,0.08)"
+warning_border = tokens['warning']
+warning_text = "#FCD34D" if is_dark else "#92400E"
+
+success_bg = "rgba(34,197,94,0.12)" if is_dark else "rgba(34,197,94,0.08)"
+success_border = tokens['success']
+success_text = "#86EFAC" if is_dark else "#166534"
+
+social_impact_html = f"""
+<div style="max-width:1000px; margin:0 auto;">
     <h2 style="
         font-family:'Inter',sans-serif;
-        color:""" + title_color + """;
-        font-size:1.5rem;
-        margin-bottom:1rem;
+        color:{title_color};
+        font-size:1.8rem;
+        font-weight:700;
+        margin-bottom:1.5rem;
+        text-align:center;
     ">🌍 Por que isso importa?</h2>
 
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.5rem; margin-bottom:2rem;">
         <div style="
-            background:rgba(239,68,68,0.1);
-            border:1px solid rgba(239,68,68,0.2);
-            border-radius:12px;
-            padding:1.2rem;
-        ">
-            <div style="font-size:2rem; margin-bottom:0.4rem;">🏥</div>
-            <div style="color:#b91c1c; font-weight:700; font-size:1rem;">Internações Evitáveis</div>
-            <div style="color:""" + body_color + """; font-size:0.82rem; margin-top:0.3rem; line-height:1.5;">
+            background:{danger_bg};
+            border:1.5px solid {danger_border};
+            border-radius:14px;
+            padding:1.5rem;
+            transition: transform 0.2s ease;
+        " onmouseover="this.style.transform='translateY(-3px)'"
+           onmouseout="this.style.transform='translateY(0)'">
+            <div style="font-size:2.5rem; margin-bottom:0.6rem;">🏥</div>
+            <div style="color:{danger_text}; font-weight:700; font-size:1.1rem; margin-bottom:0.5rem;">Internações Evitáveis</div>
+            <div style="color:{body_color}; font-size:0.88rem; line-height:1.7;">
                 Doenças como diarreia, cólera e hepatite A são causadas pela falta de água
                 tratada e esgoto coletado — e são 100% evitáveis com saneamento adequado.
             </div>
         </div>
         <div style="
-            background:rgba(234,179,8,0.1);
-            border:1px solid rgba(234,179,8,0.2);
-            border-radius:12px;
-            padding:1.2rem;
-        ">
-            <div style="font-size:2rem; margin-bottom:0.4rem;">💸</div>
-            <div style="color:#a16207; font-weight:700; font-size:1rem;">Custo Social</div>
-            <div style="color:""" + body_color + """; font-size:0.82rem; margin-top:0.3rem; line-height:1.5;">
+            background:{warning_bg};
+            border:1.5px solid {warning_border};
+            border-radius:14px;
+            padding:1.5rem;
+            transition: transform 0.2s ease;
+        " onmouseover="this.style.transform='translateY(-3px)'"
+           onmouseout="this.style.transform='translateY(0)'">
+            <div style="font-size:2.5rem; margin-bottom:0.6rem;">💸</div>
+            <div style="color:{warning_text}; font-weight:700; font-size:1.1rem; margin-bottom:0.5rem;">Custo Social</div>
+            <div style="color:{body_color}; font-size:0.88rem; line-height:1.7;">
                 Cada R$ 1 investido em saneamento poupa R$ 4 em saúde pública.
                 A falta de saneamento onera o sistema de saúde e reduz a produtividade.
             </div>
         </div>
         <div style="
-            background:rgba(34,197,94,0.1);
-            border:1px solid rgba(34,197,94,0.2);
-            border-radius:12px;
-            padding:1.2rem;
-        ">
-            <div style="font-size:2rem; margin-bottom:0.4rem;">🎯</div>
-            <div style="color:#166534; font-weight:700; font-size:1rem;">Decisão Baseada em Dados</div>
-            <div style="color:""" + body_color + """; font-size:0.82rem; margin-top:0.3rem; line-height:1.5;">
+            background:{success_bg};
+            border:1.5px solid {success_border};
+            border-radius:14px;
+            padding:1.5rem;
+            transition: transform 0.2s ease;
+        " onmouseover="this.style.transform='translateY(-3px)'"
+           onmouseout="this.style.transform='translateY(0)'">
+            <div style="font-size:2.5rem; margin-bottom:0.6rem;">🎯</div>
+            <div style="color:{success_text}; font-weight:700; font-size:1.1rem; margin-bottom:0.5rem;">Decisão Baseada em Dados</div>
+            <div style="color:{body_color}; font-size:0.88rem; line-height:1.7;">
                 Este dashboard identifica os municípios mais críticos para priorização
                 de investimentos, maximizando o impacto social de cada real gasto.
             </div>
@@ -224,7 +247,7 @@ social_impact_html = """
     </div>
 </div>
 """
-components.html(social_impact_html, height=390, scrolling=False)
+components.html(social_impact_html, height=420, scrolling=False)
 
 # ─── Metodologia ─────────────────────────────────────────────────────────────
 with st.expander("🔬 Metodologia e Fontes de Dados"):
@@ -254,15 +277,17 @@ with st.expander("🔬 Metodologia e Fontes de Dados"):
         - Kruskal-Wallis (hipótese)
         """)
 
-st.markdown("""
+st.markdown(f"""
 <div style="
     text-align:center;
-    color:#334155;
-    font-size:0.75rem;
-    margin-top:2rem;
-    padding-top:1rem;
-    border-top:1px solid rgba(148,163,184,0.08);
+    color:{body_color};
+    font-size:0.8rem;
+    margin-top:3rem;
+    padding-top:1.5rem;
+    border-top:1px solid {card_border};
+    font-weight:500;
 ">
-    Dashboard de Saneamento Básico — Espírito Santo · Dados: SNIS + DATASUS
+    Dashboard de Saneamento Básico — Espírito Santo<br>
+    <span style="color:{tokens['muted']}; font-size:0.75rem;">Dados: SNIS + DATASUS · Desenvolvido com 💧 e dados</span>
 </div>
 """, unsafe_allow_html=True)
